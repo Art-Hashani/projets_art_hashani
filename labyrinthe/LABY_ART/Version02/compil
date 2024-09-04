@@ -1,0 +1,2 @@
+echo "gcc labyrinthe.c    \$(sdl2-config --cflags --libs) -lSDL2 -lSDL2_ttf -lSDL2_image  -o labyrinthe"
+gcc -g labyrinthe.c   $(sdl2-config --cflags --libs) -lSDL2 -lSDL2_ttf -lSDL2_image  -o labyrinthe

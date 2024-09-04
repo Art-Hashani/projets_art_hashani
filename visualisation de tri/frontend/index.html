@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>visualisation de tri</title>
+  <link rel="stylesheet" href="tri.css">
+  <style>
+    /* Ajoutez du style CSS pour l'affichage des éléments si nécessaire */  
+    
+  </style>
+</head>
+<body>
+  <label for="sortingType">Choisir le type de tri :</label>
+  <select id="sortingType">
+    <option value="bubble">Tri à bulles</option>
+    <option value="dichotomy">Tri par dichotomie</option>
+    <option value="quick">Tri rapide</option>
+    <option value="insert">Tri par insertion</option>
+    <option value="pairimpair">Tri Pair/Impair</option>
+    <option value="peigne">Tri par peigne</option>
+  </select>
+  <br><br>
+
+
+  <form id="valuesForm">
+    <label for="inputValues">Entrez les valeurs séparées par des espaces :</label><br>
+    <input type="text" id="inputValues" name="inputValues"><br><br>
+    <button type="button" onclick="sortValues()">Trier</button>
+  </form>
+  <div id="visualization">
+    <!-- C'est ici que la visualisation du tri à bulles apparaîtra -->
+  </div>
+  <img src="file:///C:/Users/adeni/Downloads/projet_test_der/projet_test/backend/output.gif" alt="Description du GIF">
+
+
+  <script src="script.js"></script>
+</body>
+</html>

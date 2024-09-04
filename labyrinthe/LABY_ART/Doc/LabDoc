@@ -1,0 +1,1086 @@
+
+Cette fonction cree est responsable de la création d'un labyrinthe en utilisant un algorithme de génération aléatoire. Voici un commentaire pour expliquer son fonctionnement :
+
+// Crée le labyrinthe en utilisant un algorithme de génération aléatoire.
+// Paramètres :
+// - hauteur : la hauteur du labyrinthe
+// - largeur : la largeur du labyrinthe
+// - rep : une valeur de répétition pour l'algorithme de génération aléatoire
+// Retour :
+// - grille : un tableau de pointeurs de zones représentant le labyrinthe généré
+Zone** cree(int hauteur, int largeur, int rep){
+    Zone** grille; // Déclaration d'un tableau de pointeurs de zones
+    grille = cellules(hauteur, largeur); // Crée une grille de cellules vides de la taille spécifiée
+    generer(hauteur, largeur, grille, rep); // Génère le labyrinthe en utilisant l'algorithme de génération aléatoire
+    return grille; // Retourne le labyrinthe généré
+}
+
+Ce commentaire explique brièvement ce que fait la fonction, en décrivant les paramètres d'entrée et la valeur de retour. Il mentionne également les fonctions cellules et generer, qui sont probablement utilisées pour créer la grille de cellules vides et générer le labyrinthe lui-même. 
+
+
+Cette fonction cellules crée une grille de cases pour représenter un labyrinthe et initialise tous les murs et passages avec des valeurs par défaut. Voici un commentaire décrivant son fonctionnement :
+
+// Crée une grille de cases pour représenter un labyrinthe et initialise tous les murs et passages.
+// Paramètres :
+// - hauteur : la hauteur de la grille
+// - largeur : la largeur de la grille
+// Retour :
+// - grille : un tableau de pointeurs de zones représentant la grille de cases du labyrinthe
+Zone** cellules(int hauteur, int largeur){
+    Zone** grille = malloc(hauteur * sizeof(Zone*)); // Alloue de la mémoire pour le tableau de pointeurs de zones
+
+    for(int i = 0; i < hauteur; i++){
+        grille[i] = malloc(largeur * sizeof(Zone)); // Alloue de la mémoire pour chaque rangée de la grille
+
+        for(int j = 0; j < largeur; j++){
+            // Crée une case avec tous les murs et passages initialisés à "true" (1) sauf pour la dernière case de chaque rangée
+            // qui est initialisée à "false" (0) pour indiquer la fin de la rangée
+            Zone Case = {true, true, true, true, 0, j + (largeur - 1) * i + i, false};
+            grille[i][j] = Case; // Stocke la case créée dans la grille
+        }
+    }
+    
+    return grille; // Retourne la grille de cases du labyrinthe
+}
+Ce commentaire explique que la fonction crée une grille de cases en allouant de la mémoire pour le tableau de pointeurs de zones et chaque rangée de la grille. Ensuite, elle parcourt chaque case de la grille et initialise tous les murs et passages avec des valeurs par défaut. La dernière case de chaque rangée est initialisée avec la valeur "false" (0) dans le champ finRang pour indiquer la fin de la rangée. Enfin, la grille de cases est retournée en tant que résultat.
+
+
+
+Cette fonction generer est responsable de la génération du labyrinthe en utilisant un algorithme aléatoire basé sur le choix de directions. Voici un commentaire décrivant son fonctionnement :
+// Génère le labyrinthe en utilisant un algorithme aléatoire basé sur le choix de directions.
+// Paramètres :
+// - hauteur : la hauteur du labyrinthe
+// - largeur : la largeur du labyrinthe
+// - grille : un tableau de pointeurs de zones représentant le labyrinthe
+// - rep : une valeur de représentation pour l'affichage du labyrinthe
+void generer(int hauteur, int largeur, Zone** grille, int rep){
+    int i, j, h, l, direction, val, val2;
+    srand(time(NULL)); // Initialise le générateur de nombres aléatoires avec une graine basée sur l'heure actuelle
+
+    // Boucle jusqu'à ce que le labyrinthe soit complètement généré (vérifié par la fonction "verification")
+    while(verification(hauteur, largeur, grille) != true){
+        direction = rand() % 4; // Choix aléatoire d'une direction (0: nord, 1: sud, 2: est, 3: ouest)
+
+        // Afficher le labyrinthe à chaque étape si la valeur de "rep" est 2 ou 4
+        if(rep == 2 || rep == 4)
+            afficherlabyrinthe(hauteur, largeur, grille, rep);
+
+        if(direction == 0){ // Direction nord (haut)
+            i = (rand() % (hauteur - 1)) + 1; // i est un nombre aléatoire entre 1 et hauteur-1
+            j = rand() % largeur;
+
+            if(rep == 2 || rep == 4){
+                printf("\n");
+                printf("Nord, %d, %d \n\n\n\n", i, j);
+            }
+
+            // Vérifie si les conditions pour casser le mur nord sont remplies
+            if(grille[i][j].passage <= 1 && grille[i][j].valeur != grille[i-1][j].valeur){
+                grille[i][j].nord = false;
+                grille[i-1][j].sud = false;
+                grille[i][j].passage += 1;
+                val = grille[i][j].valeur;
+                val2 = grille[i-1][j].valeur;
+
+                // Met à jour les valeurs des zones connectées dans la grille
+                for(h = 0; h < hauteur; h++){
+                    for(l = 0; l < largeur; l++){
+                        if(grille[h][l].valeur == val)
+                            grille[h][l].valeur = val2;
+                    }
+                }
+            }
+        }
+        if(direction == 1){ // Direction sud (bas)
+            i = rand() % (hauteur - 1);
+            j = rand() % largeur;
+
+            if(rep == 2 || rep == 4){
+                printf("\n");
+                printf("Sud, %d, %d \n\n\n\n", i, j);
+            }
+
+            // Vérifie si les conditions pour casser le mur sud sont remplies
+            if(grille[i][j].passage <= 0 && grille[i][j].valeur != grille[i+1][j].valeur){
+                grille[i][j].sud = false;
+                                grille[i+1][j].nord = false;
+                grille[i][j].passage += 1;
+                val = grille[i][j].valeur;
+                val2 = grille[i+1][j].valeur;
+
+                // Met à jour les valeurs des zones connectées dans la grille
+                for(h = 0; h < hauteur; h++){
+                    for(l = 0; l < largeur; l++){
+                        if(grille[h][l].valeur == val)
+                            grille[h][l].valeur = val2;
+                    }
+                }
+            }
+        }
+        if(direction == 2){ // Direction est (droite)
+            i = rand() % hauteur;
+            j = rand() % (largeur - 1);
+
+            if(rep == 2 || rep == 4){
+                printf("\n");
+                printf("Est, %d, %d \n\n\n\n", i, j);
+            }
+
+            // Vérifie si les conditions pour casser le mur est sont remplies
+            if(grille[i][j].passage <= 0 && grille[i][j].valeur != grille[i][j+1].valeur){
+                grille[i][j].est = false;
+                grille[i][j+1].ouest = false;
+                grille[i][j].passage += 1;
+                val = grille[i][j].valeur;
+                val2 = grille[i][j+1].valeur;
+
+                // Met à jour les valeurs des zones connectées dans la grille
+                for(h = 0; h < hauteur; h++){
+                    for(l = 0; l < largeur; l++){
+                        if(grille[h][l].valeur == val)
+                            grille[h][l].valeur = val2;
+                    }
+                }
+            }
+        }
+        if(direction == 3){ // Direction ouest (gauche)
+            i = rand() % hauteur;
+            j = rand() % (largeur - 1) + 1;
+
+            if(rep == 2 || rep == 4){
+                printf("\n");
+                printf("Ouest, %d, %d \n\n\n\n", i, j);
+            }
+
+            // Vérifie si les conditions pour casser le mur ouest sont remplies
+            if(grille[i][j].passage <= 1 && grille[i][j].valeur != grille[i][j-1].valeur){
+                grille[i][j].ouest = false;
+                grille[i][j-1].est = false;
+                grille[i][j].passage += 1;
+                val = grille[i][j].valeur;
+                val2 = grille[i][j-1].valeur;
+
+                // Met à jour les valeurs des zones connectées dans la grille
+                for(h = 0; h < hauteur; h++){
+                    for(l = 0; l < largeur; l++){
+                        if(grille[h][l].valeur == val)
+                            grille[h][l].valeur = val2;
+                    }
+                }
+            }
+        }
+    }
+}
+Ce commentaire explique que la fonction utilise un algorithme aléatoire pour générer le labyrinthe en sélectionnant aléatoirement une direction (nord, sud, est ou ouest) à explorer à chaque étape. Elle vérifie ensuite si les conditions sont remplies pour casser le mur dans cette direction. Si les conditions sont satisfaites, les murs correspondants sont supprimés en mettant à jour les valeurs des indicateurs directionnels (nord, sud, est, ouest) dans la grille.
+
+De plus, la fonction met également à jour les valeurs des zones connectées dans la grille en utilisant une valeur de représentation. Elle maintient une cohérence entre les zones en fusionnant les valeurs lorsque des connexions sont établies entre elles.
+
+Enfin, si la valeur de "rep" est égale à 2 ou 4, la fonction appelle la fonction "afficherlabyrinthe" pour afficher le labyrinthe à chaque étape.
+
+Cette fonction génère donc de manière itérative le labyrinthe jusqu'à ce que toutes les zones soient connectées et qu'il n'y ait plus de murs à casser dans la grille.
+
+
+
+
+
+
+Cette fonction est responsable de l'affichage du labyrinthe dans une fenêtre graphique à l'aide de la bibliothèque SDL. Voici un commentaire expliquant son fonctionnement :
+
+void afficherlabyrinthe(int hauteur, int largeur, Zone** grille, int rep) {
+    const int CELL_SIZE = 50;
+    const int WINDOW_WIDTH = largeur * CELL_SIZE;
+    const int WINDOW_HEIGHT = hauteur * CELL_SIZE;
+
+    // Variables de fenêtre et de rendu
+    SDL_Window* window = NULL;
+    SDL_Renderer* renderer = NULL;
+    TTF_Font* font = NULL;
+
+    // Création de la fenêtre et initialisation des ressources
+    creerFenetre(&window, &renderer, &font);
+    if (window == NULL || renderer == NULL || font == NULL) {
+        return;
+    }
+
+    // Boucle principale de l'application
+    bool quit = false;
+    SDL_Event event;
+    while (!quit) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                quit = true;
+            }
+        }
+
+        // Effacement de l'écran avec une couleur de fond (noir)
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        // Afficher le labyrinthe (Cellules et murs)
+        for (int i = 0; i < hauteur; i++) {
+            for (int j = 0; j < largeur; j++) {
+                // Calcul des coordonnées de la cellule
+                int x1 = j * CELL_SIZE;
+                int y1 = i * CELL_SIZE;
+                int x2 = x1 + CELL_SIZE;
+                int y2 = y1 + CELL_SIZE;
+
+                // Dessin de la cellule
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                SDL_RenderFillRect(renderer, &(SDL_Rect){x1, y1, CELL_SIZE, CELL_SIZE});
+
+                // Dessin des murs nord, sud, est, ouest
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                if (grille[i][j].nord) {
+                    SDL_RenderDrawLine(renderer, x1, y1, x2, y1);
+                }
+                if (grille[i][j].sud) {
+                    SDL_RenderDrawLine(renderer, x1, y2, x2, y2);
+                }
+                if (grille[i][j].est) {
+                    SDL_RenderDrawLine(renderer, x2, y1, x2, y2);
+                }
+                if (grille[i][j].ouest) {
+                    SDL_RenderDrawLine(renderer, x1, y1, x1, y2);
+                }
+
+                // Afficher valeur dans la case ou pas (personnel)
+                if (rep == 2 || rep == 4) {
+                    char valeur[10];
+                    sprintf(valeur, "%d", grille[i][j].valeur);
+                    afficherTexte(renderer, font, valeur, x1 + 10, y1 + 10);
+                }
+            }
+        }
+
+        // Mettre à jour l'affichage
+        SDL_RenderPresent(renderer);
+    }
+
+    // Libération des ressources
+    TTF_CloseFont(font);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    TTF_Quit();
+    SDL_Quit();
+}
+
+Ce commentaire explique que la fonction utilise la bibliothèque SDL pour afficher le labyrinthe dans une fenêtre graphique. Voici les principales étapes de son fonctionnement :
+
+La fonction commence par définir la taille des cellules en fonction de la variable CELL_SIZE et calcule les dimensions de la fenêtre en fonction de la taille du labyrinthe.
+
+Ensuite, elle crée une fenêtre SDL, un rendu SDL et une police de caractères pour l'affichage du texte.
+
+La boucle principale de l'application est lancée, qui gère les événements SDL, notamment la possibilité de fermer la fenêtre en cliquant sur la croix.
+
+À chaque itération de la boucle, l'écran est effacé avec une couleur de fond noire.
+
+Ensuite, la fonction parcourt la grille du labyrinthe et dessine chaque cellule et ses murs correspondants en utilisant les fonctions de rendu de la bibliothèque SDL.
+
+Si la valeur de "rep" est égale à 2 ou 4, la fonction affiche également la valeur de chaque case dans le labyrinthe en utilisant la fonction "afficherTexte".
+
+Enfin, l'affichage est mis à jour avec la fonction SDL_RenderPresent().
+
+Une fois la boucle principale terminée, les ressources sont libérées (police de caractères, rendu, fenêtre) et la bibliothèque SDL est proprement fermée.
+
+En résumé, cette fonction utilise la bibliothèque SDL pour créer une fenêtre graphique, afficher le labyrinthe en dessinant les cellules et les murs, et éventuellement afficher les valeurs des cases. Cela permet une représentation visuelle du labyrinthe généré.
+
+
+
+
+
+
+/Vérifier si toutes les valeurs de la grilles sont égales
+bool verification(int hauteur , int largeur, Zone** grille){
+    int val = grille[0][0].valeur;
+    for(int i=0;i<hauteur;i++){
+        for(int j=0;j<largeur;j++){
+            if(val != grille[i][j].valeur) return false;
+        }  
+    }
+    return true;
+}
+La fonction verification permet de vérifier si toutes les valeurs de la grille sont égales. Voici comment elle fonctionne :
+
+La fonction prend en paramètre la hauteur et la largeur de la grille, ainsi que la grille elle-même.
+
+Elle initialise une variable val avec la valeur de la première cellule de la grille (grille[0][0].valeur).
+
+Ensuite, à l'aide de boucles imbriquées, la fonction parcourt toutes les cellules de la grille. Si la valeur d'une cellule diffère de la valeur initiale val, cela signifie que les valeurs de la grille ne sont pas toutes égales, et la fonction retourne false.
+
+Si la fonction a parcouru toutes les cellules de la grille sans trouver de différence de valeur, cela signifie que toutes les valeurs sont égales, et la fonction retourne true.
+
+En résumé, la fonction verification vérifie si toutes les valeurs de la grille sont égales en comparant chaque valeur avec la première valeur de la grille. Elle renvoie true si toutes les valeurs sont égales et false sinon.
+
+Ce commentaire explique que la fonction parcourt toutes les cellules de la grille en utilisant des boucles for imbriquées. Elle compare la valeur de chaque cellule avec la valeur initiale val qui est définie comme étant la valeur de la première cellule de la grille (grille[0][0].valeur).
+
+Si une valeur de cellule est différente de val, cela signifie que toutes les valeurs de la grille ne sont pas égales, et la fonction retourne false.
+
+Si la fonction parcourt toutes les cellules de la grille sans trouver de différence de valeur, cela signifie que toutes les valeurs sont égales, et la fonction retourne true.
+
+En résumé, cette fonction permet de vérifier si toutes les valeurs de la grille sont égales en comparant chaque valeur avec une valeur de référence. Elle renvoie true si toutes les valeurs sont égales et false sinon.
+
+
+
+
+
+
+
+La fonction afficher_texte permet d'afficher du texte à l'écran en utilisant la bibliothèque SDL et la bibliothèque SDL_ttf pour la gestion des polices de caractères. Voici un commentaire décrivant le fonctionnement de cette fonction :
+
+// Affiche un texte à l'écran
+void afficher_texte(TTF_Font *police, SDL_Surface *surface, char *texte, int x, int y) {
+    SDL_Color couleur_texte = {255, 255, 255}; // Couleur du texte (blanc)
+    SDL_Surface *surface_texte = TTF_RenderText_Blended(police, texte, couleur_texte); // Rendu du texte sur une surface
+    SDL_Rect position_texte = {x, y, 0, 0}; // Position du texte à l'écran
+    SDL_BlitSurface(surface_texte, NULL, surface, &position_texte); // Copie de la surface du texte sur la surface principale
+    SDL_FreeSurface(surface_texte); // Libération de la surface du texte
+}
+Ce commentaire explique que la fonction utilise une police de caractères spécifiée par le paramètre police, une surface principale spécifiée par le paramètre surface, un texte à afficher spécifié par le paramètre texte, ainsi que les coordonnées x et y pour indiquer la position du texte à l'écran.
+
+La couleur du texte est définie comme étant du blanc avec la valeur {255, 255, 255}. La fonction TTF_RenderText_Blended de la bibliothèque SDL_ttf est utilisée pour rendre le texte sur une surface avec la police et la couleur spécifiées.
+
+Ensuite, la surface du texte est copiée sur la surface principale à l'aide de SDL_BlitSurface, en utilisant la position spécifiée par position_texte.
+
+Finalement, la surface du texte est libérée avec SDL_FreeSurface pour éviter les fuites de mémoire.
+
+En résumé, cette fonction permet d'afficher un texte à l'écran en utilisant une police de caractères, une couleur spécifiée et des coordonnées pour positionner le texte sur une surface principale.
+
+
+
+
+
+
+
+
+La fonction afficherTexte permet d'afficher du texte à l'écran en utilisant la bibliothèque SDL_ttf pour la gestion des polices de caractères. Voici un commentaire décrivant le fonctionnement de cette fonction :
+// Affiche un texte à l'écran
+void afficherTexte(SDL_Renderer* renderer, TTF_Font* font, const char* texte, int x, int y) {
+    // Création de la couleur du texte (blanc)
+    SDL_Color textColor = {255, 255, 255, 255};
+
+    // Création de la surface du texte
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, texte, textColor);
+    if (textSurface == NULL) {
+        printf("Erreur lors de la création de la surface du texte : %s\n", TTF_GetError());
+        return;
+    }
+
+    // Création de la texture du texte à partir de la surface
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    if (textTexture == NULL) {
+        printf("Erreur lors de la création de la texture du texte : %s\n", SDL_GetError());
+        SDL_FreeSurface(textSurface);
+        return;
+    }
+
+    // Libération de la surface du texte (plus nécessaire une fois la texture créée)
+    SDL_FreeSurface(textSurface);
+
+    // Obtention des dimensions du texte
+    int textWidth, textHeight;
+    SDL_QueryTexture(textTexture, NULL, NULL, &textWidth, &textHeight);
+
+    // Position du texte
+    SDL_Rect textRect;
+    textRect.x = x;
+    textRect.y = y;
+    textRect.w = textWidth;
+    textRect.h = textHeight;
+
+    // Affichage du texte
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    // Libération de la texture du texte
+    SDL_DestroyTexture(textTexture);
+}
+Ce commentaire explique que la fonction utilise un rendu (renderer), une police de caractères spécifiée (font), un texte à afficher (texte), ainsi que les coordonnées x et y pour indiquer la position du texte à l'écran.
+
+La couleur du texte est définie comme étant du blanc avec la valeur {255, 255, 255, 255}. La fonction TTF_RenderText_Solid de la bibliothèque SDL_ttf est utilisée pour rendre le texte sur une surface avec la police et la couleur spécifiées.
+
+Ensuite, la surface du texte est convertie en une texture du texte à l'aide de SDL_CreateTextureFromSurface, en utilisant le rendu spécifié.
+
+La surface du texte est ensuite libérée avec SDL_FreeSurface car elle n'est plus nécessaire une fois la texture créée.
+
+Les dimensions du texte sont obtenues à l'aide de SDL_QueryTexture pour connaître la largeur et la hauteur du texte.
+
+La position du texte est définie avec les coordonnées x et y, et la taille du texte est définie avec les dimensions obtenues précédemment.
+
+Enfin, le texte est affiché à l'écran avec SDL_RenderCopy, en utilisant le rendu, la texture du texte et la position du texte.
+
+Finalement, la texture du texte est libérée avec SDL_DestroyTexture pour éviter les fuites de mémoire.
+
+En résumé, cette fonction permet d'afficher un texte à l'écran en utilisant une police de caractères
+
+
+
+
+
+
+La fonction creerFenetre est utilisée pour initialiser la bibliothèque SDL, créer une fenêtre graphique, créer un renderer et charger une police de caractères. Voici un commentaire décrivant le fonctionnement de cette fonction :
+// Crée une fenêtre, un renderer et charge une police de caractères
+void creerFenetre(SDL_Window** window, SDL_Renderer** renderer, TTF_Font** font) {
+    // Initialisation de SDL
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        printf("Erreur lors de l'initialisation de SDL : %s\n", SDL_GetError());
+        return;
+    }
+
+    // Initialisation de SDL_ttf
+    if (TTF_Init() != 0) {
+        printf("Erreur lors de l'initialisation de SDL_ttf : %s\n", TTF_GetError());
+        SDL_Quit();
+        return;
+    }
+
+    // Création de la fenêtre
+    *window = SDL_CreateWindow("Labyrinthe", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 800, SDL_WINDOW_SHOWN);
+    if (*window == NULL) {
+        printf("Erreur lors de la création de la fenêtre : %s\n", SDL_GetError());
+        TTF_Quit();
+        SDL_Quit();
+        return;
+    }
+
+    // Création du renderer
+    *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED);
+    if (*renderer == NULL) {
+        printf("Erreur lors de la création du renderer : %s\n", SDL_GetError());
+        SDL_DestroyWindow(*window);
+        TTF_Quit();
+        SDL_Quit();
+        return;
+    }
+
+    // Chargement de la police de caractères
+    *font = TTF_OpenFont("arial.ttf", 24);
+    if (*font == NULL) {
+        printf("Erreur lors du chargement de la police de caractères : %s\n", TTF_GetError());
+        SDL_DestroyRenderer(*renderer);
+        SDL_DestroyWindow(*window);
+        TTF_Quit();
+        SDL_Quit();
+        return;
+    }
+}
+Ce commentaire explique que la fonction initialise la bibliothèque SDL en appelant SDL_Init avec l'argument SDL_INIT_VIDEO. Si l'initialisation échoue, un message d'erreur est affiché.
+
+Ensuite, la fonction initialise la bibliothèque SDL_ttf en appelant TTF_Init. Si l'initialisation échoue, un message d'erreur est affiché et les ressources SDL sont libérées avec SDL_Quit.
+
+La fonction crée une fenêtre graphique en appelant SDL_CreateWindow avec les paramètres spécifiés (titre, position et dimensions de la fenêtre). Si la création de la fenêtre échoue, un message d'erreur est affiché et les ressources SDL et SDL_ttf sont libérées.
+
+Ensuite, la fonction crée un renderer en appelant SDL_CreateRenderer avec la fenêtre, un index de pilote (-1 pour sélectionner le premier pilote disponible prenant en charge l'accélération matérielle) et l'option SDL_RENDERER_ACCELERATED pour utiliser l'accélération matérielle. Si la création du renderer échoue, un message d'erreur est affiché et les ressources SDL, SDL_ttf et la fenêtre sont libérées.
+
+ la fonction creerFenetre charge une police de caractères en appelant la fonction TTF_OpenFont avec le nom du fichier de la police. Dans cet exemple, le fichier de la police utilisée est "arial.ttf" et la taille de la police est fixée à 24 points. Cette étape est nécessaire pour pouvoir afficher du texte à l'écran avec la police spécifiée. Si le chargement de la police échoue, un message d'erreur est affiché et toutes les ressources SDL sont libérées avant de quitter l'application.
+
+
+
+La fonction afficherlabyrinthe est responsable de l'affichage du labyrinthe dans une fenêtre graphique en utilisant la bibliothèque SDL.
+
+Voici un commentaire pour décrire cette fonction :
+// Affiche le labyrinthe dans une fenêtre graphique en utilisant la bibliothèque SDL
+// - hauteur : la hauteur du labyrinthe
+// - largeur : la largeur du labyrinthe
+// - grille : la grille du labyrinthe
+// - rep : le mode d'affichage (2 ou 4 pour afficher les valeurs des cellules, autre valeur pour ne pas afficher les valeurs)
+void afficherlabyrinthe(int hauteur, int largeur, Zone** grille, int rep) {
+    const int CELL_SIZE = 50;
+    const int WINDOW_WIDTH = largeur * CELL_SIZE;
+    const int WINDOW_HEIGHT = hauteur * CELL_SIZE;
+
+    // Variables de fenêtre et de rendu
+    SDL_Window* window = NULL;
+    SDL_Renderer* renderer = NULL;
+    TTF_Font* font = NULL;
+
+    // Création de la fenêtre et initialisation des ressources
+    creerFenetre(&window, &renderer, &font);
+    if (window == NULL || renderer == NULL || font == NULL) {
+        return;
+    }
+
+    // Boucle principale de l'application
+    bool quit = false;
+    SDL_Event event;
+    while (!quit) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                quit = true;
+            }
+        }
+
+        // Effacement de l'écran avec une couleur de fond (noir)
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        // Afficher le labyrinthe (Cellules et murs)
+        for (int i = 0; i < hauteur; i++) {
+            for (int j = 0; j < largeur; j++) {
+                int x1 = j * CELL_SIZE;
+                int y1 = i * CELL_SIZE;
+                int x2 = x1 + CELL_SIZE;
+                int y2 = y1 + CELL_SIZE;
+
+                // Dessin de la cellule
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                SDL_RenderFillRect(renderer, &(SDL_Rect){x1, y1, CELL_SIZE, CELL_SIZE});
+
+                // Dessin des murs nord, sud, est, ouest
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                if (grille[i][j].nord) {
+                    SDL_RenderDrawLine(renderer, x1, y1, x2, y1);
+                }
+                if (grille[i][j].sud) {
+                    SDL_RenderDrawLine(renderer, x1, y2, x2, y2);
+                }
+                if (grille[i][j].est) {
+                    SDL_RenderDrawLine(renderer, x2, y1, x2, y2);
+                }
+                if (grille[i][j].ouest) {
+                    SDL_RenderDrawLine(renderer, x1, y1, x1, y2);
+                }
+
+                // Afficher la valeur dans la case si le mode d'affichage le permet
+                if (rep == 2 || rep == 4) {
+                    char valeur[10];
+                    sprintf(valeur, "%d", grille[i][j].valeur);
+                    afficherTexte(renderer, font, valeur, x1 + 10, y1 + 10);
+                }
+            }
+        }
+
+        // Mettre à jour l'affichage
+        SDL_RenderPresent(renderer);
+    }
+
+    // Libération des ressources
+    TTF_CloseFont(font);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    TTF_Quit();
+    SDL_Quit();
+}
+Cette fonction crée une fenêtre graphique avec la taille appropriée en fonction de la hauteur et de la largeur du labyrinthe. Ensuite, elle utilise une boucle pour afficher le labyrinthe en dessinant les cellules et les murs. Si le mode d'affichage (représenté par la variable rep) est égal à 2 ou 4, elle affiche également les valeurs des cellules en utilisant la fonction afficherTexte.
+
+Enfin, la fonction met à jour l'affichage de la fenêtre et reste dans la boucle principale jusqu'à ce que l'utilisateur ferme la fenêtre. Après cela, elle libère les ressources utilisées par la fenêtre et quitte.
+
+
+
+
+
+La fonction generer génère le labyrinthe en utilisant l'algorithme de génération de labyrinthe aléatoire basé sur la méthode de l'Union-Find. Voici une explication plus détaillée du code :
+
+void generer(int hauteur, int largeur, Zone** grille, int rep) {
+    int i, j, h, l, direction, val, val2;
+    srand(time(NULL));
+
+    while (verification(hauteur, largeur, grille) != true) {
+        direction = rand() % 4;
+
+        // Afficher grille à chaque étape
+        if (rep == 2 || rep == 4) {
+            afficherlabyrinthe(hauteur, largeur, grille, rep);
+        }
+
+        if (direction == 0) { // 0 = NORD = haut
+            i = (rand() % (hauteur - 1)) + 1; // i est entre 1 et hauteur-1
+            j = rand() % largeur;
+
+            if (rep == 2 || rep == 4) {
+                printf("\n");
+                printf("Nord, %d, %d \n\n\n\n", i, j);
+            }
+
+            if (grille[i][j].passage <= 1 && grille[i][j].valeur != grille[i - 1][j].valeur) {
+                grille[i][j].nord = false;
+                grille[i - 1][j].sud = false;
+                grille[i][j].passage += 1;
+                val = grille[i][j].valeur;
+                val2 = grille[i - 1][j].valeur;
+
+                for (h = 0; h < hauteur; h++) {
+                    for (l = 0; l < largeur; l++) {
+                        if (grille[h][l].valeur == val) {
+                            grille[h][l].valeur = val2;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Les autres blocs (directions) suivent une structure similaire.
+
+        // direction==1 correspond à SUD (bas)
+        // direction==2 correspond à EST (droite)
+        // direction==3 correspond à OUEST (gauche)
+
+        // Après chaque opération de passage entre les cellules adjacentes,
+        // les valeurs des cellules sont mises à jour pour fusionner les ensembles.
+
+        // La boucle se poursuit tant que le labyrinthe n'est pas complètement généré.
+    }
+}
+Ce code effectue les étapes suivantes :
+
+Initialise le générateur de nombres aléatoires avec srand(time(NULL)) pour obtenir des résultats aléatoires différents à chaque exécution du programme.
+La boucle principale while continue jusqu'à ce que la fonction verification retourne true, indiquant que le labyrinthe est entièrement généré et vérifié.
+À chaque itération, une direction aléatoire est choisie (Nord, Sud, Est ou Ouest) pour créer un passage entre les cellules adjacentes.
+Si le mode d'affichage rep est 2 ou 4, la fonction afficherlabyrinthe est appelée pour afficher le labyrinthe à chaque étape.
+Selon la direction choisie, les murs entre les cellules sont supprimés en mettant à jour les valeurs des propriétés nord, sud, est ou ouest de la grille.
+
+
+
+
+
+
+
+
+
+
+
+La fonction verif_resolution permet de vérifier si toutes les cellules du labyrinthe ont été résolues. Voici une explication détaillée du code :
+bool verif_resolution(int hauteur, int largeur, Zone** grille) {
+    for (int i = hauteur - 1; i >= 0; i--) {
+        for (int j = largeur - 1; j >= 0; j--) {
+            if (grille[i][j].resolu == false) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+Ce code effectue les étapes suivantes :
+
+La boucle externe parcourt les lignes du bas vers le haut (de hauteur-1 à 0).
+La boucle interne parcourt les colonnes de la droite vers la gauche (de largeur-1 à 0).
+À chaque itération, la fonction vérifie si la propriété resolu de la cellule actuelle est false. Si c'est le cas pour au moins une cellule, cela signifie que le labyrinthe n'est pas entièrement résolu et la fonction renvoie false.
+Si toutes les cellules ont la propriété resolu à true, cela signifie que le labyrinthe est entièrement résolu et la fonction renvoie true.
+
+
+
+
+
+
+La fonction afficher_resolution affiche le labyrinthe avec sa résolution. Voici une explication détaillée du code :
+void afficher_resolution(int hauteur, int largeur, Zone** grille, int resolution) {
+    int i, j;
+
+    // Première ligne de sols* (*sol = mur horizontal)
+    for (j = 0; j < largeur; j++) {
+        if (j == 0)
+            printf("┌───");
+        if (j == largeur - 1)
+            printf("┐");
+        else if (grille[0][j].est == false)
+            printf("────");
+        else
+            printf("┬───");
+    }
+
+    // Afficher le labyrinthe (cellules et murs)
+    for (i = 0; i < hauteur; i++) {
+        printf("\n│ "); // Première colonne de murs
+        for (j = 0; j < largeur; j++) {
+            // Afficher valeur dans la case ou pas (personnel)
+            if (j < largeur) {
+                if (grille[i][j].valeur == 0) {
+                    printf("*");
+                } else
+                    printf(" ");
+            }
+
+            if (j == (largeur - 1) || (grille[i][j].est == true && grille[i][j + 1].ouest == true)) {
+                printf(" │ ");
+            } else
+                printf("   ");
+        }
+        printf("\n");
+        for (j = 0; j < largeur; j++) {
+            if (i == (hauteur - 1) || (grille[i][j].sud == true && grille[i + 1][j].nord == true)) {
+                // Dernière ligne de sols
+                if (i == hauteur - 1) {
+                    if (j == 0)
+                        printf("└───");
+                    if (j == largeur - 1)
+                        printf("┘");
+                    else if (grille[i][j].est == false)
+                        printf("────");
+                    else
+                        printf("┴───");
+                } else
+                    printf(" ───");
+            } else
+                printf("    ");
+        }
+    }
+}
+Ce code effectue les étapes suivantes :
+
+La première boucle for affiche la première ligne de murs supérieurs du labyrinthe en utilisant des caractères spéciaux Unicode pour créer une apparence de coins et de murs horizontaux.
+Ensuite, une boucle externe for parcourt les lignes du labyrinthe.
+À chaque itération, la première colonne de murs est affichée, suivie de chaque cellule du labyrinthe.
+Les caractères utilisés pour représenter les cellules dépendent de leur valeur. Si la valeur est 0, le caractère "*" est affiché, sinon un espace est affiché.
+Ensuite, en fonction des murs présents dans chaque cellule, les caractères appropriés sont affichés pour créer l'apparence des murs entre les cellules.
+Après avoir parcouru les cellules d'une ligne, une nouvelle ligne est créée en affichant les murs inférieurs du labyrinthe en utilisant des caractères spéciaux Unicode.
+Enfin, le processus est répété pour chaque ligne du labyrinthe jusqu'à ce que le labyrinthe entier soit affiché.
+
+Cette fonction utilise des caractères spéciaux Unicode pour afficher les murs, les coins et les passages du labyrinthe. Elle parcourt la grille de cellules et imprime les caractères appropriés pour représenter les murs et les passages. Les murs horizontaux sont représentés par des lignes continues (────), les murs verticaux par des lignes brisées (│), les coins supérieurs gauche et droit par des caractères spéciaux (┌ et ┐), les coins inférieurs gauche et droit par d'autres caractères spéciaux (└ et ┘), et les intersections de murs par d'autres caractères spéciaux (┬, ┴, ─). Les passages sont représentés par des espaces vides.
+
+Cette fonction est utilisée pour afficher la résolution du labyrinthe une fois que celle-ci est calculée.
+
+J'espère que cela répond à votre question. N'hésitez pas à me demander si vous avez besoin de plus d'informations !
+
+
+
+
+La fonction resoudre permet de résoudre le labyrinthe en utilisant l'algorithme de résolution. Voici le détail de son fonctionnement :
+
+void afficher_resolution(int hauteur,int largeur, Zone** grille, int resolution){
+    int i,j;
+   
+    //Première ligne de sols* (*sol = mur horizontal)
+    for(j=0;j<largeur;j++){
+        if(j==0) printf("┌───");
+        if(j==largeur-1) printf("┐");
+        else if(grille[0][j].est == false) printf("────");
+        else printf("┬───");
+    }
+   
+    //Afficher le labyrinthe (cellules et murs)
+    for(i=0;i<hauteur;i++){
+        printf("\n│ "); //Première colonne de murs
+        for(j=0;j<largeur;j++){
+            //Afficher valeur dans la case ou pas (personnel)
+            if(j<largeur){
+                if(grille[i][j].valeur == 0){
+                    printf("*");
+                }else printf(" ");
+            }
+           
+            if(j==(largeur-1) || (grille[i][j].est == true
+                && grille[i][j+1].ouest == true)){
+                printf(" │ ");
+            }else printf("   ");
+        }
+        printf("\n");
+        for(j=0;j<largeur;j++){
+            if(i == (hauteur-1) || (grille[i][j].sud == true
+                && grille[i+1][j].nord == true)){
+                //Dernier ligne sols
+                if(i==hauteur-1){
+                    if(j==0) printf("└───");
+                    if(j==largeur-1) printf("┘");
+                    else if(grille[i][j].est == false) printf("────");
+                    else printf("┴───");
+                }else printf(" ───");
+               
+            }else printf("    ");
+        }
+    }
+}
+
+Cette fonction résout le labyrinthe en utilisant un algorithme basé sur les valeurs des cellules. Elle met d'abord toutes les valeurs des cellules à zéro. Ensuite, elle itère tant que la résolution du labyrinthe n'est pas vérifiée. Pendant chaque itération, elle met à jour les valeurs des cellules en fonction des valeurs adjacentes et des murs du labyrinthe. Elle marque également les cellules comme résolues lorsqu'elles ont une valeur assignée.
+
+Ensuite, elle réinitialise toutes les cellules comme n'étant pas résolues. Puis, elle parcourt le labyrinthe en partant de la case en haut à gauche et en se déplaçant vers la case en bas à droite en choisissant le chemin qui a une valeur inférieure ou égale à la valeur actuelle de la cellule. Elle met à jour les valeurs et marque les cellules comme résolues pendant ce processus.
+
+Enfin, elle fixe la valeur de la dernière cellule (en bas à droite) à zéro et la marque comme résolue, puis renvoie la grille résolue.
+
+Note : Cette fonction suppose que vous avez déjà défini la structure Zone et les fonctions auxiliaires verif_resolution et afficher_resolution.
+
+
+
+
+
+
+
+La fonction resoudre que vous avez partagée est correcte. Elle résout le labyrinthe en utilisant un algorithme basé sur les valeurs des cellules. Voici à nouveau la fonction :
+// Résolution du labyrinthe
+Zone** resoudre(int hauteur, int largeur, Zone** grille) {
+    int i, j;
+
+    // Initialisation des valeurs des cases du labyrinthe à zéro
+    for (i = 0; i < hauteur; i++) {
+        for (j = 0; j < largeur; j++) {
+            grille[i][j].valeur = 0;
+        }
+    }
+
+    // Boucle principale de résolution
+    while (verif_resolution(hauteur, largeur, grille) == false) {
+        // Parcours du labyrinthe de bas en haut, de droite à gauche
+        for (i = hauteur - 1; i >= 0; i = i - 1) {
+            for (j = largeur - 1; j >= 0; j = j - 1) {
+                if (grille[i][j].resolu == false) {
+                    if (grille[i][j].valeur != 0 || (i == hauteur - 1 && j == largeur - 1)) {
+                        // Nord
+                        if (i > 0 && grille[i][j].nord == false && grille[i - 1][j].resolu == false) {
+                            grille[i - 1][j].valeur = grille[i][j].valeur + 1;
+                        }
+                        // Sud
+                        if (i < hauteur - 1 && grille[i][j].sud == false && grille[i + 1][j].resolu == false) {
+                            grille[i + 1][j].valeur = grille[i][j].valeur + 1;
+                        }
+                        // Est
+                        if (j < largeur - 1 && grille[i][j].est == false && grille[i][j + 1].resolu == false) {
+                            grille[i][j + 1].valeur = grille[i][j].valeur + 1;
+                        }
+                        // Ouest
+                        if (j > 0 && grille[i][j].ouest == false && grille[i][j - 1].resolu == false) {
+                            grille[i][j - 1].valeur = grille[i][j].valeur + 1;
+                        }
+                        grille[i][j].resolu = true;
+                    }
+                }
+            }
+        }
+    }
+
+    // Réinitialisation de toutes les cases à resolu = false
+    for (i = 0; i < hauteur; i++) {
+        for (j = 0; j < largeur; j++) {
+            grille[i][j].resolu = false;
+        }
+    }
+
+    // Parcours du labyrinthe pour trouver le chemin de résolution
+    i = 0;
+    j = 0;
+    while (i != hauteur - 1 || j != largeur - 1) {
+        // Nord
+        if (i > 0 && grille[i][j].nord == false && (grille[i - 1][j].valeur <= grille[i][j].valeur) && grille[i - 1][j].resolu == false) {
+            grille[i][j].valeur = 0;
+            grille[i][j].resolu = true;
+            i--;
+        }
+        // Sud
+        if (i < hauteur - 1 && grille[i][j].sud == false && (grille[i + 1][j].valeur <= grille[i][j].valeur) && grille[i + 1][j].resolu == false) {
+grille[i][j].valeur = 0;
+grille[i][j].resolu = true;
+i++;
+}
+// Est
+if (j < largeur - 1 && grille[i][j].est == false && (grille[i][j + 1].valeur <= grille[i][j].valeur) && grille[i][j + 1].resolu == false) {
+grille[i][j].valeur = 0;
+grille[i][j].resolu = true;
+j++;
+}
+// Ouest
+if (j > 0 && grille[i][j].ouest == false && (grille[i][j - 1].valeur <= grille[i][j].valeur) && grille[i][j - 1].resolu == false) {
+grille[i][j].valeur = 0;
+grille[i][j].resolu = true;
+j--;
+}
+}
+
+// Réinitialisation de la valeur de la case finale à zéro et marquage comme résolue
+grille[hauteur - 1][largeur - 1].valeur = 0;
+grille[hauteur - 1][largeur - 1].resolu = true;
+
+// Retourne la grille mise à jour avec la résolution
+return grille;
+}
+
+
+
+Ce code effectue la résolution d'un labyrinthe représenté par une grille de cases. Il utilise une approche basée sur l'algorithme de recherche du chemin le plus court en utilisant la distance de Manhattan.
+
+La fonction commence par initialiser les valeurs des cases à zéro. Ensuite, elle effectue une boucle principale tant que la résolution du labyrinthe n'est pas vérifiée. À chaque itération, elle parcourt le labyrinthe de bas en haut et de droite à gauche, en attribuant des valeurs croissantes aux cases adjacentes non résolues. Cela se fait en considérant les murs entre les cases et en vérifiant les conditions pour se déplacer vers le nord, le sud, l'est ou l'ouest.
+
+Une fois que le labyrinthe est résolu, la fonction réinitialise les marquages de résolution des cases à false. Ensuite, elle effectue un parcours à partir de la case de départ pour trouver le chemin de résolution en se déplaçant vers les cases voisines ayant une valeur inférieure ou égale. Ce processus réinitialise les valeurs des cases sur le chemin de résolution à zéro et les marque comme résolues.
+
+Enfin, la valeur de la case finale est réinitialisée à zéro et marquée comme résolue. La fonction renvoie la grille mise à jour avec la résolution du labyrinthe.
+
+
+
+
+
+
+int Saisie(SDL_Surface *surface_fenetre, SDL_Window *fenetre, int x, int y) {
+    int reponse ;
+    char *Text = malloc(100 * sizeof(char));
+    strcpy(Text, "");
+    TTF_Font *police = TTF_OpenFont("arial.ttf", 24);
+    SDL_Event evenement;
+    while (1) {
+        SDL_WaitEvent(&evenement);
+        if (evenement.type == SDL_QUIT) break;
+        if (evenement.type == SDL_KEYDOWN && evenement.key.keysym.sym == SDLK_RETURN) {
+            break;
+        }
+        if (evenement.type == SDL_KEYDOWN && evenement.key.keysym.sym == SDLK_BACKSPACE) {
+            if (strlen(Text) > 0) {
+                Text[strlen(Text)] = '\0';
+            }
+        }
+        if (evenement.type == SDL_TEXTINPUT) {
+            if (strlen(Text) < 100) {
+                strcat(Text, evenement.text.text);
+            }
+        }
+        reponse = atoi(Text);
+        afficher_texte(police, surface_fenetre, Text, x, y);
+        SDL_UpdateWindowSurface(fenetre);
+    }
+    TTF_CloseFont(police);
+    // return Text;
+    return reponse;
+}
+
+La  fonction de saisie permettant à l'utilisateur d'entrer un nombre à l'aide d'une interface graphique SDL. Voici une description de son fonctionnement :
+
+La fonction commence par déclarer les variables nécessaires, notamment reponse pour stocker la réponse finale et Text pour stocker le texte saisi par l'utilisateur.
+
+Ensuite, elle crée une boucle infinie while (1) pour gérer les événements SDL.
+
+À l'intérieur de la boucle, la fonction utilise SDL_WaitEvent(&evenement) pour attendre un événement.
+
+Si l'événement est de type SDL_QUIT, cela signifie que l'utilisateur a fermé la fenêtre, donc la boucle est interrompue avec break.
+
+Si l'événement est une touche enfoncée (SDL_KEYDOWN), la fonction vérifie si la touche enfoncée est la touche "Entrée" (SDLK_RETURN). Si c'est le cas, la boucle est également interrompue avec break, indiquant que la saisie est terminée.
+
+Si la touche enfoncée est la touche "Retour arrière" (SDLK_BACKSPACE), la fonction vérifie si le texte saisi n'est pas vide (strlen(Text) > 0) avant de supprimer le dernier caractère en le remplaçant par le caractère de fin de chaîne ('\0').
+
+Si l'événement est de type SDL_TEXTINPUT, cela signifie que l'utilisateur a entré un texte à l'aide du clavier. La fonction vérifie d'abord si la longueur du texte saisi est inférieure à 100 (strlen(Text) < 100) avant de concaténer le texte entré à la chaîne Text à l'aide de strcat.
+
+La fonction convertit ensuite la chaîne de caractères Text en un entier à l'aide de atoi et stocke le résultat dans reponse.
+
+Ensuite, la fonction utilise une fonction afficher_texte pour afficher le texte saisi sur la surface de la fenêtre à une position spécifiée (x et y).
+
+Enfin, la fonction met à jour la surface de la fenêtre avec SDL_UpdateWindowSurface pour afficher les modifications.
+
+Une fois que la boucle est interrompue, la fonction ferme la police de caractères avec TTF_CloseFont(police).
+
+La fonction renvoie la réponse sous forme d'entier (reponse).
+
+Note : La ligne // return Text; est mise en commentaire, ce qui signifie qu'elle est désactivée. Si vous souhaitez renvoyer la chaîne de caractères saisie plutôt que l'entier, vous pouvez supprimer le commentaire.
+
+
+
+int menu() {
+    	int reponse;
+	int Hauteur, Largeur;
+
+    	TTF_Init();
+
+    	SDL_Init(SDL_INIT_VIDEO);
+
+    	SDL_Window *fenetre = SDL_CreateWindow("Question / Réponse", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    	SDL_Surface *surface_fenetre = SDL_GetWindowSurface(fenetre);
+
+    	TTF_Font *police = TTF_OpenFont("arial.ttf", 24);
+
+    	char saisie[100] = "";
+
+    	afficher_texte(police, surface_fenetre,
+                "\n###############################################################\n",
+                50, 50);
+    	afficher_texte(police, surface_fenetre,
+                "Consigne : Entrez votre chiffre puis taper [Entrer].\n\n",
+                50, 100);
+    	afficher_texte(police, surface_fenetre,
+                "(1) Generer un labyrinthe simple.\n",
+                50, 150);
+    	afficher_texte(police, surface_fenetre,
+                "(2) Generer un labyrinthe en affichant toutes ses étapes.\n",
+                50, 200);
+    	afficher_texte(police, surface_fenetre,
+                "(3) Generer un labyrinthe avec ses valeurs.\n",
+                50, 250);
+    	afficher_texte(police, surface_fenetre,
+                "(4) Generer un labyrinthe en affichant ses étapes et ses valeurs.\n",
+                50, 300);
+    	afficher_texte(police, surface_fenetre,
+                "Votre réponse : ",
+                50, 350);
+
+    	SDL_UpdateWindowSurface(fenetre);
+
+    	bool Quit = false;
+    	SDL_Event evenement;
+    	while (!Quit) {
+                reponse = Saisie(surface_fenetre, fenetre, 250, 350);
+
+        	// reponse = atoi(saisie);
+        	if (reponse == 3 || reponse == 4) {
+            		afficher_texte(police, surface_fenetre,
+                            	"(CONSEIL) 3x3 maximum pour eviter les décalages",
+                            	50, 400);
+        	} else if (reponse == 1) {
+        		afficher_texte(police, surface_fenetre,
+                        	"(CONSEIL) 15x15 maximum pour éviter que ce soit long",
+                        	50, 400);
+        		afficher_texte(police, surface_fenetre,
+                        	"Entrez la [hauteur] du labyrinthe : ",
+                        	50, 450);
+        		Hauteur = Saisie(surface_fenetre, fenetre, 425, 450);
+        		afficher_texte(police, surface_fenetre,
+                        	"Entrez maintenant sa [largeur] : ",
+                        	50, 500);
+        		Largeur = Saisie(surface_fenetre, fenetre, 425, 450);
+
+        		Quit = true;
+            	}
+                SDL_UpdateWindowSurface(fenetre);
+	}
+    	TTF_CloseFont(police);
+    	TTF_Quit();
+    	SDL_DestroyWindow(fenetre);
+	Labyrinthe(reponse, Hauteur, Largeur);
+    	SDL_Quit();
+    	return 0;
+}
+
+La fonction menu definit un menu graphique utilisant SDL pour permettre à l'utilisateur de choisir différentes options. Voici une description de son fonctionnement :
+
+La fonction commence par déclarer les variables nécessaires, notamment reponse pour stocker la réponse sélectionnée par l'utilisateur, ainsi que Hauteur et Largeur pour stocker les dimensions du labyrinthe.
+
+Ensuite, la fonction initialise la bibliothèque SDL et TTF à l'aide des fonctions SDL_Init(SDL_INIT_VIDEO) et TTF_Init().
+
+Elle crée une fenêtre SDL intitulée "Question / Réponse" et une surface associée à cette fenêtre à l'aide des fonctions SDL_CreateWindow et SDL_GetWindowSurface.
+
+La fonction charge une police de caractères avec TTF_OpenFont pour utiliser dans l'affichage du texte.
+
+Un texte d'instruction et plusieurs options de menu sont affichés sur la surface de la fenêtre à l'aide de la fonction afficher_texte.
+
+La fonction met à jour la surface de la fenêtre avec SDL_UpdateWindowSurface pour afficher les modifications.
+
+Une boucle while est utilisée pour gérer les événements SDL et attendre que l'utilisateur fasse un choix.
+
+Dans la boucle, la fonction appelle la fonction Saisie pour permettre à l'utilisateur d'entrer un nombre correspondant à son choix.
+
+Selon la valeur de reponse, des conseils supplémentaires peuvent être affichés pour guider l'utilisateur dans sa sélection.
+
+Si l'utilisateur choisit l'option 1, des messages supplémentaires sont affichés pour demander à l'utilisateur de saisir la hauteur et la largeur du labyrinthe à générer. Les valeurs saisies sont stockées dans les variables Hauteur et Largeur.
+
+La variable Quit est définie sur true pour sortir de la boucle.
+
+Une fois que la boucle est terminée, la police de caractères est fermée avec TTF_CloseFont, la bibliothèque TTF est désinitialisée avec TTF_Quit, la fenêtre SDL est détruite avec SDL_DestroyWindow, et la bibliothèque SDL est quittée avec SDL_Quit.
+
+Finalement, la fonction appelle une autre fonction Labyrinthe avec les paramètres reponse, Hauteur et Largeur, pour effectuer des actions supplémentaires en fonction du choix de l'utilisateur.
+
+La fonction renvoie 0.
+
+Note : La fonction Saisie appelée dans la boucle n'est pas fournie ici, mais elle est probablement utilisée pour saisir un nombre à l'aide d'une interface graphique SDL, comme nous l'avons vu précédemment.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
